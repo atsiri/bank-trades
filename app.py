@@ -34,11 +34,21 @@ if check_password():
 
     with col_img1:
         # Replace 'image1.png' with your actual file path or URL
-        st.image("image1.png", width=100) 
+        #st.image("image1.png", width=100) 
+        img_1 = st.secrets["IMG1"]
+        st.markdown(
+            f'<img src="data:image/png;base64,{img_1}" width="100">',
+            unsafe_allow_html=True
+        )
 
     with col_img2:
         # Replace 'image2.png' with your actual file path or URL
-        st.image("image2.png", width=100)
+        #st.image("image2.png", width=100)
+        img_2 = st.secrets["IMG2"]
+        st.markdown(
+            f'<img src="data:image/png;base64,{img_2}" width="100">',
+            unsafe_allow_html=True
+        )
 # ---------------------------------
    
     # --- 1. PAGE CONFIG & THEME ---
