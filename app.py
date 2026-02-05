@@ -117,7 +117,7 @@ if check_password():
     # st.sidebar.header("🔍 Filter & Pencarian")
     search_query = st.sidebar.text_input("Cari Nama / Jabatan / Broker:", value="").upper().strip()
     selected_banks = st.sidebar.multiselect("Pilih Bank:", options=bank_list, default=bank_list)
-    selected_names = st.sidebar.multiselect("Pilih Nama (Source):", options=name_list)
+    selected_names = st.sidebar.multiselect("Pilih Nama:", options=name_list)
     selected_brokers = st.sidebar.multiselect("Pilih Broker:", options=broker_list)
 
     # --- 4. FILTERING LOGIC ---
