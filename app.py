@@ -27,7 +27,20 @@ def check_password():
                 st.error("😕 Password incorrect")
     return False
 
-if check_password():      
+if check_password():   
+    # --- Header Images ---
+    # Using columns to place images at the extreme left and right
+    col_img1, col_mid, col_img2 = st.columns([1, 8, 1])
+
+    with col_img1:
+        # Replace 'image1.png' with your actual file path or URL
+        st.image("image1.png", width=100) 
+
+    with col_img2:
+        # Replace 'image2.png' with your actual file path or URL
+        st.image("image2.png", width=100)
+# ---------------------------------
+   
     # --- 1. PAGE CONFIG & THEME ---
     st.set_page_config(
         layout="wide", 
@@ -62,8 +75,12 @@ if check_password():
         return network_df, broker_df
 
     raw_df, broker_trx_df = load_data()
-
+    
+    # --- 2. PREPARE FILTER LISTS ---
     bank_list = sorted(raw_df['Bank'].unique())
+    broker_list = sorted(broker_trx_df['Nama Broker'].unique())
+    name_list = sorted(raw_df['Source'].unique())
+    # Color map for banks
     palette = ["#FF4B4B", "#1E88E5", "#4CAF50", "#FF9800", "#9C27B0", "#00BCD4", "#795548"]
     bank_color_map = {bank: palette[i % len(palette)] for i, bank in enumerate(bank_list)}
 
@@ -97,19 +114,38 @@ if check_password():
                 del st.session_state[key]
         st.rerun()
 
-    search_query = st.sidebar.text_input("Cari Nama:", value="", key="search").upper().strip()
-
-    available_banks = sorted(raw_df['Bank'].unique())
-    selected_banks = st.sidebar.multiselect("Pilih Bank:", options=available_banks, key="banks", default=available_banks)
+    # st.sidebar.header("🔍 Filter & Pencarian")
+    search_query = st.sidebar.text_input("Cari Nama / Jabatan / Broker:", value="").upper().strip()
+    selected_banks = st.sidebar.multiselect("Pilih Bank:", options=bank_list, default=bank_list)
+    selected_names = st.sidebar.multiselect("Pilih Nama (Source):", options=name_list)
+    selected_brokers = st.sidebar.multiselect("Pilih Broker:", options=broker_list)
 
     # --- 4. FILTERING LOGIC ---
     f_graph = raw_df[raw_df['Bank'].isin(selected_banks)].copy()
+
+    # << CHANGED: Apply Nama filter if selections are made >>
+    if selected_names:
+        f_graph = f_graph[f_graph['Source'].isin(selected_names)]
+
+    # << CHANGED: Apply Broker filter if selections are made >>
+    # Filters graph to show connections involving selected brokers
+    if selected_brokers:
+        f_graph = f_graph[(f_graph['Source'].isin(selected_brokers)) | (f_graph['Target'].isin(selected_brokers))]
 
     if search_query:
         mask = (f_graph['Source'].str.upper().str.contains(search_query) |
                 f_graph['Target'].str.upper().str.contains(search_query) |
                 f_graph['Jabatan'].str.upper().str.contains(search_query))
         f_graph = f_graph[mask]
+    
+    # # --- 4. FILTERING LOGIC ---
+    # f_graph = raw_df[raw_df['Bank'].isin(selected_banks)].copy()
+
+    # if search_query:
+    #     mask = (f_graph['Source'].str.upper().str.contains(search_query) |
+    #             f_graph['Target'].str.upper().str.contains(search_query) |
+    #             f_graph['Jabatan'].str.upper().str.contains(search_query))
+    #     f_graph = f_graph[mask]
 
     # --- 5. NETWORK PREPARATION ---
     all_nodes = pd.concat([f_graph['Source'], f_graph['Target']]).unique()
